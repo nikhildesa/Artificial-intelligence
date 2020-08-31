@@ -36,7 +36,8 @@ ACTIONS = (
     ( 0,  1)  # go right
 )
 
-from utils.search_app import OrderedSet, Stack, Queue, PriorityQueue
+from search_app import OrderedSet, Stack, Queue, PriorityQueue
+
 """
  Four different structures are provided as the containers of the open set
  and closed set.
@@ -200,7 +201,7 @@ def depth_first_search(grid_size, start, goal, obstacles, costFn, logger):
     # Choose a proper container yourself from
     # OrderedSet, Stack, Queue, PriorityQueue
     # for the open set and closed set.
-    open_set = OrderedSet()
+    open_set = Stack()
     closed_set = OrderedSet()
     ##########################################
 
@@ -219,8 +220,47 @@ def depth_first_search(grid_size, start, goal, obstacles, costFn, logger):
     actions = [ # the action that the parent took to reach the cell
         [None for __ in range(n_cols)] for _ in range(n_rows)
     ]
-   
+
     movement = []
+    open_set.add((start_row,start_col))
+            
+    while(len(open_set) > 0):
+        node = open_set.pop()
+
+        closed_set.add(node)
+        children = []
+        valid_children = []
+        
+        # add child left, top, right, bottom
+        children.append((node[0],node[1]-1))
+        children.append((node[0]-1,node[1]))
+        children.append((node[0],node[1]+1))
+        children.append((node[0]+1,node[1]))
+        
+        
+        for i in range(len(children)):
+            element = children[i]
+            if ((children[i][0] > 0 and children[i][1] > 0)):
+                if((children[i][0] < 20 and children[i][1] < 30)):
+                    if(element not in obstacles):
+                        valid_children.append(element)
+                
+
+        for child in valid_children:
+            if (child not in open_set and child not in closed_set):
+                    if child == goal:
+                        closed_set.add(child)
+                        action_taken = (child[0] - node[0],child[1] - node[1])
+                        movement.append(action_taken)
+                        return movement, closed_set
+                    else:
+                      open_set.add(child)
+             
+        future_child = open_set[-1]  # top of the open set
+        action_taken = (future_child[0] - node[0],future_child[1] - node[1])
+        movement.append(action_taken)
+        
+        
     # ----------------------------------------
     # finish the code below
     # ----------------------------------------
@@ -247,7 +287,7 @@ def uniform_cost_search(grid_size, start, goal, obstacles, costFn, logger):
     # Choose a proper container yourself from
     # OrderedSet, Stack, Queue, PriorityQueue
     # for the open set and closed set.
-    open_set = OrderedSet()
+    open_set = PriorityQueue()
     closed_set = OrderedSet()
     ##########################################
 
@@ -268,6 +308,7 @@ def uniform_cost_search(grid_size, start, goal, obstacles, costFn, logger):
     ]
 
     movement = []
+    
     # ----------------------------------------
     # finish the code below
     # ----------------------------------------
@@ -327,7 +368,7 @@ def astar_search(grid_size, start, goal, obstacles, costFn, logger):
 
 if __name__ == "__main__":
     # make sure actions and cost are defined correctly
-    from utils.search_app import App
+    from search_app import App
     assert(ACTIONS == App.ACTIONS)
 
     import tkinter as tk
